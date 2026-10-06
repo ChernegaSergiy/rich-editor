@@ -156,6 +156,14 @@
     }
   }
 
+  function logout() {
+    key = '';
+    localStorage.removeItem('re_key');
+    authed = false;
+    editing = null;
+    banner = '';
+  }
+
   function show(tab) {
     view = tab;
     if (tab === 'posts') loadPosts();
@@ -201,8 +209,19 @@
     </aside>
     <div class="main-content">
       <div class="topbar">
-        <h1>{view === 'compose' ? 'Новий допис' : 'Надіслані'}</h1>
-        {#if editing}<small>Правка поста #{editing}</small>{/if}
+        <span></span>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          {#if editing}<span class="badge">Правка #{editing}</span>{/if}
+          <span class="badge active">{channel || '…'}</span>
+          <button
+            type="button"
+            class="secondary outline"
+            style="border-radius: 99px; margin: 0; padding: 0.35rem 1rem; font-size: 0.85rem;"
+            onclick={logout}
+          >
+            Вийти
+          </button>
+        </div>
       </div>
       <div class="content-area">
         {#if view === 'compose'}
@@ -290,11 +309,11 @@
         {:else}
           <div class="page-header">
             <div>
-              <h2>Надіслані дописи</h2>
+              <h2 style="margin: 0;">Надіслані дописи</h2>
+              <p style="color: var(--pico-muted-color); margin: 0;">Опубліковане в каналі.</p>
             </div>
             <button
               type="button"
-              class="secondary"
               style="border-radius: 99px; padding: 0.5rem 1.5rem; margin: 0;"
               onclick={loadPosts}
             >
