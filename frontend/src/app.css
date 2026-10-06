@@ -289,3 +289,50 @@ pre.src {
     overflow: auto;
   }
 }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+article.card {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--pico-muted-border-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+article.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+}
+
+article.card header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+article.card .content {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+article.card footer {
+  padding: 1rem 1.5rem;
+  background-color: var(--pico-form-element-background-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: none;
+}
+
+.moh-meta {
+  font-size: 0.85rem;
+  color: var(--pico-muted-color);
+  margin-top: 0.5rem;
+}
