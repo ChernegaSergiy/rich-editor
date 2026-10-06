@@ -1,175 +1,201 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rich-редактор · @nl_pe</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
 <style>
-:root{--bg:#0f1419;--card:#1a2230;--line:#2a3850;--tx:#e8eef6;--mut:#8fa1b8;--acc:#2f9e44}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,sans-serif}
-.wrap{max-width:760px;margin:0 auto;padding:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
-h1{font-size:20px;margin:8px 0}h2{font-size:16px;margin:0 0 8px}
-textarea,input[type=text]{width:100%;background:#0d1218;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:8px;font:inherit}
-textarea{min-height:70px;resize:vertical}
-button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;margin:4px 4px 4px 0}
-button.ghost{background:#2a3850}
-button.danger{background:#c0392b}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.mut{color:var(--mut);font-size:13px}
-.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.thumb{position:relative;width:96px}.thumb img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
-.thumb .ctl{display:flex;gap:2px;margin-top:2px}.thumb .ctl button{padding:2px 6px;font-size:12px;margin:0}
-pre{background:#0d1218;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;font-size:12px;white-space:pre-wrap}
-.block{border:1px dashed var(--line);border-radius:8px;padding:8px;margin:8px 0}
-.tabs{display:flex;gap:8px;margin:12px 0}.tabs button.on{outline:2px solid #fff}
-.post{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:8px 0}
-a{color:#7db8ff}
-#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10}
-#gate .card{width:min(420px,90vw)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;margin-top:.5rem}
+.thumb{position:relative}
+.thumb img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:.5rem;display:block}
+.thumb nav{display:flex;gap:.25rem;margin-top:.25rem}
+.thumb nav button{padding:.15rem .5rem;font-size:.8rem}
+.phone{background:#0e1621;border:1px solid var(--pico-muted-border-color);border-radius:1rem;padding:1rem;max-width:480px}
+.bubble{background:#182533;border-radius:.75rem;padding:.75rem 1rem;margin-bottom:.5rem}
+.bubble h1,.bubble h2,.bubble h3{margin:.2rem 0}
+.bubble .grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:.5rem 0}
+.bubble .grid img{width:100%;border-radius:.4rem;display:block}
+.badge{font-size:.8rem;color:var(--pico-muted-color)}
+pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 </style>
 </head>
 <body>
-<div id="gate"><div class="card"><h1>Rich-редактор</h1>
-<p class="mut">Введи ADMIN_KEY (зберігається тільки в цьому браузері).</p>
-<input type="text" id="key" placeholder="ADMIN_KEY" autocomplete="off">
-<div class="row" style="margin-top:8px"><button onclick="login()">Увійти</button></div>
-<p class="mut" id="gate_err"></p></div></div>
+<main class="container" id="gate">
+<article style="max-width:440px;margin:10vh auto">
+<h1>Rich-редактор</h1>
+<p>Дописи в канал без Premium: текст — абзацами, фото — слайдшоу.</p>
+<label>ADMIN_KEY<input type="password" id="key" autocomplete="off"></label>
+<button onclick="login()">Увійти</button>
+<p><small id="gate_err"></small></p>
+</article>
+</main>
 
-<div class="wrap" id="app" style="display:none">
-<h1>Rich-редактор · <span id="ch"></span></h1>
-<div class="tabs">
-<button id="tab_c" class="on" onclick="tab('c')">Допис</button>
-<button id="tab_p" onclick="tab('p')">Надіслані</button>
+<main class="container" id="app" style="display:none">
+<nav><h1>Rich-редактор · <span id="ch" class="badge"></span></h1></nav>
+<div role="group">
+<button id="tab_c" onclick="tab('c')">Допис</button>
+<button id="tab_p" class="secondary" onclick="tab('p')">Надіслані</button>
 </div>
 
-<div id="pane_c">
-<div class="card"><h2>Блоки</h2><div id="blocks"></div>
-<div class="row">
+<section id="pane_c">
+<article><h2>Блоки</h2><div id="blocks"></div>
+<div role="group">
 <button onclick="add('p')">+ Абзац</button>
 <button onclick="add('h')">+ Заголовок</button>
 <button onclick="add('slideshow')">+ Слайдшоу</button>
-<button class="ghost" onclick="add('divider')">+ Розділювач</button>
+<button class="secondary" onclick="add('divider')">+ Розділювач</button>
 </div>
-<p class="mut">Розмітка в тексті: **жирний**, *курсив*, `код`, [текст](https://url). Довгий текст — абзацами, а не підписом.</p>
+<p><small>Розмітка: **жирний**, *курсив*, `код`, [текст](https://url). Довгий текст — абзацами, а не підписом.</small></p>
+</article>
+
+<article><h2>Як побачать читачі</h2><div class="phone" id="pv">—</div>
+<details><summary>Точний HTML для Telegram</summary><pre class="src" id="src">—</pre></details>
+</article>
+
+<article><h2>Публікація</h2>
+<div class="grid">
+<label>Канал<input id="chat"></label>
+<label>message_id для правки чужого<input id="mid" placeholder="порожньо — свій"></label>
 </div>
-
-<div class="card"><h2>Превʼю HTML</h2>
-<div class="row"><button class="ghost" onclick="preview()">Оновити превʼю</button></div>
-<pre id="pv">—</pre></div>
-
-<div class="card"><h2>Публікація</h2>
-<div class="row"><input type="text" id="chat" style="max-width:220px">
-<input type="text" id="mid" placeholder="message_id для edit чужого" style="max-width:220px"></div>
-<div class="row" style="margin-top:8px">
+<div role="group">
 <button onclick="send()">Надіслати новий</button>
-<button class="ghost" onclick="saveEdit()">Зберегти правку</button>
-<span class="mut" id="editinfo"></span></div>
-<p id="res"></p></div>
+<button class="secondary" onclick="saveEdit()">Зберегти правку</button>
 </div>
+<p><small id="editinfo"></small></p>
+<p id="res"></p>
+</article>
+</section>
 
-<div id="pane_p" style="display:none"><div class="card"><h2>Надіслані дописи</h2>
-<div class="row"><button class="ghost" onclick="loadPosts()">Оновити</button></div>
-<div id="posts"></div></div></div>
-</div>
+<section id="pane_p" style="display:none">
+<article><h2>Надіслані дописи</h2>
+<button class="secondary" onclick="loadPosts()">Оновити</button>
+<div id="posts"></div></article>
+</section>
+</main>
 
 <script>
 let K=localStorage.getItem('re_key')||'';
 let BL=[];let editing=null;
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function md(t){
+  let o=esc(t);
+  o=o.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+     .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g,'<i>$1</i>')
+     .replace(/`(.+?)`/g,'<code>$1</code>')
+     .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2">$1</a>');
+  return o.replace(/\n/g,'<br>');
+}
 async function api(p,m,b,form){
   const h={'X-Auth-Key':K};let o={method:m||'GET',headers:h};
   if(form){o.body=form}else if(b!==undefined){h['Content-Type']='application/json';o.body=JSON.stringify(b)}
   const r=await fetch(p,o);return r.json();
 }
 async function login(){
-  K=document.getElementById('key').value.trim();localStorage.setItem('re_key',K);
-  const r=await api('/api/config');if(r.ok){enter()}else{document.getElementById('gate_err').textContent='Невірний ключ'}
+  K=$('key').value.trim();localStorage.setItem('re_key',K);
+  const r=await api('/api/config');if(r.ok){enter()}else{$('gate_err').textContent='Невірний ключ'}
 }
 async function enter(){
-  document.getElementById('gate').style.display='none';
-  document.getElementById('app').style.display='block';
+  $('gate').style.display='none';$('app').style.display='block';
   const r=await api('/api/config');
-  document.getElementById('ch').textContent=r.channel;
-  document.getElementById('chat').value=r.channel;
+  $('ch').textContent=r.channel;$('chat').value=r.channel;
   if(!BL.length)add('slideshow');
 }
 function tab(t){
-  document.getElementById('tab_c').className=t=='c'?'on':'';
-  document.getElementById('tab_p').className=t=='p'?'on':'';
-  document.getElementById('pane_c').style.display=t=='c'?'block':'none';
-  document.getElementById('pane_p').style.display=t=='p'?'block':'none';
+  $('tab_c').className=t=='c'?'':'secondary';
+  $('tab_p').className=t=='p'?'':'secondary';
+  $('pane_c').style.display=t=='c'?'block':'none';
+  $('pane_p').style.display=t=='p'?'block':'none';
   if(t=='p')loadPosts();
 }
 function add(t){
   const b={t};if(t=='p')b.text='';if(t=='h'){b.level=2;b.text=''}
   if(t=='slideshow'){b.photos=[];b.caption=''}
-  BL.push(b);render();
+  BL.push(b);render();vprev();
 }
-function del(i){BL.splice(i,1);render()}
-function mv(i,d){const j=i+d;if(j<0||j>=BL.length)return;const t=BL[i];BL[i]=BL[j];BL[j]=t;render()}
-function phmv(bi,i,d){const p=BL[bi].photos;const j=i+d;if(j<0||j>=p.length)return;const t=p[i];p[i]=p[j];p[j]=t;render()}
-function phdel(bi,i){BL[bi].photos.splice(i,1);render()}
+function del(i){BL.splice(i,1);render();vprev()}
+function mv(i,d){const j=i+d;if(j<0||j>=BL.length)return;const x=BL[i];BL[i]=BL[j];BL[j]=x;render();vprev()}
+function phmv(bi,i,d){const p=BL[bi].photos;const j=i+d;if(j<0||j>=p.length)return;const x=p[i];p[i]=p[j];p[j]=x;render();vprev()}
+function phdel(bi,i){BL[bi].photos.splice(i,1);render();vprev()}
 async function up(bi,files){
   for(const f of files){
     const fd=new FormData();fd.append('photo',f);
     const r=await api('/api/upload','POST',null,fd);
     if(r.ok)BL[bi].photos.push({up:r.upload_id,url:r.preview_url});else alert(r.description);
   }
-  render();
+  render();vprev();
 }
+const NAMES={p:'Абзац',h:'Заголовок',slideshow:'Слайдшоу',divider:'Розділювач'};
 function render(){
-  const w=document.getElementById('blocks');w.innerHTML='';
+  const w=$('blocks');w.innerHTML='';
   BL.forEach((b,i)=>{
-    const d=document.createElement('div');d.className='block';
-    let h='<div class="row"><b>'+({p:'Абзац',h:'Заголовок',slideshow:'Слайдшоу',divider:'Розділювач'}[b.t])+'</b>'
-      +'<span style="flex:1"></span><button class="ghost" onclick="mv('+i+',-1)">↑</button>'
-      +'<button class="ghost" onclick="mv('+i+',1)">↓</button>'
-      +'<button class="danger" onclick="del('+i+')">✕</button></div>';
-    if(b.t=='p')h+='<textarea oninput="BL['+i+'].text=this.value">'+(b.text||'')+'</textarea>';
-    if(b.t=='h')h+='<div class="row"><input type="text" value="'+(b.level||2)+'" style="max-width:60px" oninput="BL['+i+'].level=this.value">'
-      +'<textarea oninput="BL['+i+'].text=this.value" style="flex:1">'+(b.text||'')+'</textarea></div>';
+    const d=document.createElement('article');d.style.margin='0 0 .75rem';
+    let h='<header><strong>'+NAMES[b.t]+'</strong> <span style="float:right">'
+      +'<button class="secondary" style="width:auto;padding:.2rem .6rem" onclick="mv('+i+',-1)">↑</button> '
+      +'<button class="secondary" style="width:auto;padding:.2rem .6rem" onclick="mv('+i+',1)">↓</button> '
+      +'<button class="contrast" style="width:auto;padding:.2rem .6rem" onclick="del('+i+')">✕</button></span></header>';
+    if(b.t=='p')h+='<textarea oninput="BL['+i+'].text=this.value;vprev()">'+esc(b.text||'')+'</textarea>';
+    if(b.t=='h')h+='<div class="grid"><label>Рівень 1–6<input value="'+(b.level||2)+'" oninput="BL['+i+'].level=this.value;vprev()"></label>'
+      +'<label>Текст<textarea oninput="BL['+i+'].text=this.value;vprev()">'+esc(b.text||'')+'</textarea></label></div>';
     if(b.t=='slideshow'){
       h+='<input type="file" accept="image/*" multiple onchange="up('+i+',this.files)"><div class="thumbs">';
       (b.photos||[]).forEach((p,j)=>{
-        h+='<div class="thumb"><img src="'+p.url+'"><div class="ctl"><button class="ghost" onclick="phmv('+i+','+j+',-1)">←</button>'
-          +'<button class="ghost" onclick="phmv('+i+','+j+',1)">→</button>'
-          +'<button class="danger" onclick="phdel('+i+','+j+')">✕</button></div></div>';
+        h+='<div class="thumb"><img src="'+p.url+'"><nav><button class="secondary" onclick="phmv('+i+','+j+',-1)">←</button>'
+          +'<button class="secondary" onclick="phmv('+i+','+j+',1)">→</button>'
+          +'<button class="contrast" onclick="phdel('+i+','+j+')">✕</button></nav></div>';
       });
-      h+='</div><input type="text" placeholder="Короткий підпис (можна порожньо)" value="'+(b.caption||'').replace(/"/g,'&quot;')+'" oninput="BL['+i+'].caption=this.value" style="margin-top:8px">';
+      h+='</div><label style="margin-top:.5rem">Короткий підпис (можна порожньо)<input value="'+esc(b.caption||'').replace(/"/g,'&quot;')+'" oninput="BL['+i+'].caption=this.value;vprev()"></label>';
     }
     d.innerHTML=h;w.appendChild(d);
   });
-  document.getElementById('editinfo').textContent=editing?('Правка поста #'+editing):'';
+  $('editinfo').textContent=editing?('Правка поста #'+editing):'';
+}
+function vprev(){
+  let h='';
+  for(const b of BL){
+    if(b.t=='p')h+='<div class="bubble">'+md(b.text||'…')+'</div>';
+    else if(b.t=='h'){const l=Math.min(3,Math.max(1,+b.level||2));h+='<div class="bubble"><h'+l+'>'+md(b.text||'…')+'</h'+l+'></div>'}
+    else if(b.t=='divider')h+='<hr>';
+    else if(b.t=='slideshow'){
+      h+='<div class="bubble"><div class="grid">';
+      (b.photos||[]).forEach(p=>{h+='<img src="'+p.url+'">'});
+      h+='</div>'+(b.caption?('<small>'+md(b.caption)+'</small>'):'')+'</div>';
+    }
+  }
+  $('pv').innerHTML=h||'—';
 }
 async function preview(){
   const r=await api('/api/preview','POST',{blocks:BL});
-  document.getElementById('pv').textContent=r.ok?r.html:('Помилка: '+r.description);
+  $('src').textContent=r.ok?r.html:('Помилка: '+r.description);
 }
 async function send(){
-  const r=await api('/api/send','POST',{chat:document.getElementById('chat').value,blocks:BL});
-  document.getElementById('res').innerHTML=r.ok?('Опубліковано: <a target="_blank" href="'+r.link+'">'+r.link+'</a>'):('Помилка: '+r.description);
+  await preview();
+  const r=await api('/api/send','POST',{chat:$('chat').value,blocks:BL});
+  $('res').innerHTML=r.ok?('Опубліковано: <a target="_blank" href="'+r.link+'">'+r.link+'</a>'):('Помилка: '+r.description);
 }
 async function saveEdit(){
-  const mid=document.getElementById('mid').value.trim();
+  await preview();
+  const mid=$('mid').value.trim();
   const b={blocks:BL};if(editing)b.post_id=editing;else if(mid)b.message_id=+mid;
   else{alert('Нема чого правити: відкрий пост зі списку або введи message_id');return}
-  b.chat=document.getElementById('chat').value;
+  b.chat=$('chat').value;
   const r=await api('/api/edit','POST',b);
-  document.getElementById('res').innerHTML=r.ok?('Збережено: <a target="_blank" href="'+r.link+'">'+r.link+'</a>'):('Помилка: '+r.description);
+  $('res').innerHTML=r.ok?('Збережено: <a target="_blank" href="'+r.link+'">'+r.link+'</a>'):('Помилка: '+r.description);
 }
 async function loadPosts(){
-  const r=await api('/api/posts');const w=document.getElementById('posts');w.innerHTML='';
+  const r=await api('/api/posts');const w=$('posts');w.innerHTML='';
   if(!r.ok){w.textContent='Помилка: '+r.description;return}
-  if(!r.posts.length){w.innerHTML='<p class="mut">Поки порожньо.</p>';return}
+  if(!r.posts.length){w.innerHTML='<p>Поки порожньо.</p>';return}
   r.posts.forEach(p=>{
-    const d=document.createElement('div');d.className='post';
-    d.innerHTML='<div><a target="_blank" href="'+p.link+'">#'+p.message_id+'</a> · '+p.chat+' · '+p.created_at.slice(0,16).replace('T',' ')+'<br><span class="mut"></span></div>';
-    d.querySelector('.mut').textContent=p.excerpt;
-    const e=document.createElement('button');e.className='ghost';e.textContent='Правити';
-    e.onclick=async()=>{const q=await api('/api/posts/'+p.id);if(q.ok){BL=q.post.blocks;editing=p.id;render();tab('c');preview()}};
-    const x=document.createElement('button');x.className='danger';x.textContent='Видалити';
+    const d=document.createElement('div');
+    d.innerHTML='<hr><div><a target="_blank" href="'+p.link+'">#'+p.message_id+'</a> · '+esc(p.chat)+' · '+esc(p.created_at.slice(0,16).replace('T',' '))+'<br><small>'+esc(p.excerpt)+'</small></div>';
+    const g=document.createElement('div');g.setAttribute('role','group');
+    const e=document.createElement('button');e.className='secondary';e.textContent='Правити';
+    e.onclick=async()=>{const q=await api('/api/posts/'+p.id);if(q.ok){BL=q.post.blocks;editing=p.id;render();vprev();preview();tab('c')}};
+    const x=document.createElement('button');x.className='contrast';x.textContent='Видалити';
     x.onclick=async()=>{if(confirm('Видалити пост #'+p.message_id+'?')){await api('/api/delete','POST',{post_id:p.id});loadPosts()}};
-    const g=document.createElement('div');g.appendChild(e);g.appendChild(x);d.appendChild(g);w.appendChild(d);
+    g.appendChild(e);g.appendChild(x);d.appendChild(g);w.appendChild(d);
   });
 }
 if(K)login();
