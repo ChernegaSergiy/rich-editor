@@ -12,6 +12,18 @@
   let result = $state('');
   let src = $state('—');
   let posts = $state([]);
+  let banner = $state('');
+  let bannerErr = $state(false);
+  let bannerTimer = null;
+
+  function displayBanner(msg, isErr = false) {
+    banner = msg;
+    bannerErr = !!isErr;
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => {
+      banner = '';
+    }, 4000);
+  }
 
   const NAMES = { p: 'Абзац', h: 'Заголовок', slideshow: 'Слайдшоу', divider: 'Розділювач' };
 
@@ -89,7 +101,7 @@
       fd.append('photo', f);
       const r = await api('/api/upload', 'POST', null, fd);
       if (r.ok) blocks[bi].photos.push({ up: r.upload_id, url: r.preview_url });
-      else alert(r.description);
+      else displayBanner(r.description, true);
     }
   }
 
@@ -111,10 +123,10 @@
     const b = { blocks };
     if (editing) b.post_id = editing;
     else if (foreignId.trim()) b.message_id = +foreignId.trim();
-    else {
-      alert('Нема чого правити: відкрий пост зі списку або введи message_id');
-      return;
-    }
+  else {
+    displayBanner('Нема чого правити: відкрий пост зі списку або введи message_id', true);
+    return;
+  }
     b.chat = chat;
     const r = await api('/api/edit', 'POST', b);
     result = r.ok
@@ -185,7 +197,7 @@
           <li><a class:active={view === 'posts'} onclick={() => show('posts')}>Надіслані</a></li>
         </ul>
       </nav>
-      <div class="sidebar-footer"><small>{channel}</small></div>
+      <div class="sidebar-footer"><span class="badge">{channel}</span></div>
     </aside>
     <div class="main-content">
       <div class="topbar">
@@ -212,7 +224,11 @@
                     <label>Текст<textarea bind:value={b.text}></textarea></label>
                   </div>
                 {:else if b.t === 'slideshow'}
-                  <SlideshowEditor bind:photos={b.photos} authKey={key} onupload={(f) => up(i, f)} />
+                  <SlideshowEditor
+                    bind:photos={b.photos}
+                    authKey={key}
+                    onupload={(f) => up(i, f)}
+                  />
                   <label style="margin-top: 0.5rem;">
                     Короткий підпис (можна порожньо)
                     <input bind:value={b.caption} />
@@ -294,4 +310,7 @@
       </div>
     </div>
   </div>
+  {#if banner}
+    <div class="app-banner" class:app-error={bannerErr}>{banner}</div>
+  {/if}
 {/if}
