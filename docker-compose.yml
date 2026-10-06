@@ -1,0 +1,14 @@
+services:
+  rich-editor:
+    build: .
+    container_name: rich-editor
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/data
+    networks:
+      - proxy-net
+
+networks:
+  proxy-net:
+    external: true
