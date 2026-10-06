@@ -23,9 +23,11 @@ pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 <article style="max-width:440px;margin:10vh auto">
 <h1>Rich-редактор</h1>
 <p>Дописи в канал без Premium: текст — абзацами, фото — слайдшоу.</p>
-<label>ADMIN_KEY<input type="password" id="key" autocomplete="off"></label>
-<button onclick="login()">Увійти</button>
-<p><small id="gate_err"></small></p>
+<form onsubmit="login();return false">
+<label>ADMIN_KEY<input type="password" id="key" autocomplete="off" autofocus></label>
+<button type="submit">Увійти</button>
+</form>
+<p><small id="gate_err" style="color:var(--pico-del-color)"></small></p>
 </article>
 </main>
 
