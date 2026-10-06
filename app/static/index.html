@@ -7,17 +7,15 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
 <style>
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;margin-top:.5rem}
-.thumb{position:relative}
-.thumb img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:.5rem;display:block}
+.thumb img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--pico-border-radius);display:block;border:1px solid var(--pico-muted-border-color)}
 .thumb nav{display:flex;gap:.25rem;margin-top:.25rem}
-.thumb nav button{padding:.15rem .5rem;font-size:.8rem}
-.phone{background:#0e1621;border:1px solid var(--pico-muted-border-color);border-radius:1rem;padding:1rem;max-width:480px}
-.bubble{background:#182533;border-radius:.75rem;padding:.75rem 1rem;margin-bottom:.5rem}
-.bubble h1,.bubble h2,.bubble h3{margin:.2rem 0}
+button.s{width:auto;padding:.15rem .6rem;font-size:.85rem;margin:0}
+.bubble{border:1px solid var(--pico-muted-border-color);border-radius:var(--pico-border-radius);padding:.75rem 1rem;margin-bottom:.5rem}
 .bubble .grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:.5rem 0}
-.bubble .grid img{width:100%;border-radius:.4rem;display:block}
-.badge{font-size:.8rem;color:var(--pico-muted-color)}
+.bubble .grid img{width:100%;border-radius:4px;display:block}
 pre.src{font-size:.75rem;max-height:220px;overflow:auto}
+.block-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.block-head strong{flex:1}
 </style>
 </head>
 <body>
@@ -32,7 +30,7 @@ pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 </main>
 
 <main class="container" id="app" style="display:none">
-<nav><h1>Rich-редактор · <span id="ch" class="badge"></span></h1></nav>
+<h1>Rich-редактор · <small id="ch"></small></h1>
 <div role="group">
 <button id="tab_c" onclick="tab('c')">Допис</button>
 <button id="tab_p" class="secondary" onclick="tab('p')">Надіслані</button>
@@ -41,15 +39,15 @@ pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 <section id="pane_c">
 <article><h2>Блоки</h2><div id="blocks"></div>
 <div role="group">
-<button onclick="add('p')">+ Абзац</button>
-<button onclick="add('h')">+ Заголовок</button>
-<button onclick="add('slideshow')">+ Слайдшоу</button>
+<button class="secondary" onclick="add('p')">+ Абзац</button>
+<button class="secondary" onclick="add('h')">+ Заголовок</button>
+<button class="secondary" onclick="add('slideshow')">+ Слайдшоу</button>
 <button class="secondary" onclick="add('divider')">+ Розділювач</button>
 </div>
 <p><small>Розмітка: **жирний**, *курсив*, `код`, [текст](https://url). Довгий текст — абзацами, а не підписом.</small></p>
 </article>
 
-<article><h2>Як побачать читачі</h2><div class="phone" id="pv">—</div>
+<article><h2>Як побачать читачі</h2><div id="pv"><small>Порожньо.</small></div>
 <details><summary>Точний HTML для Telegram</summary><pre class="src" id="src">—</pre></details>
 </article>
 
@@ -131,19 +129,19 @@ function render(){
   const w=$('blocks');w.innerHTML='';
   BL.forEach((b,i)=>{
     const d=document.createElement('article');d.style.margin='0 0 .75rem';
-    let h='<header><strong>'+NAMES[b.t]+'</strong> <span style="float:right">'
-      +'<button class="secondary" style="width:auto;padding:.2rem .6rem" onclick="mv('+i+',-1)">↑</button> '
-      +'<button class="secondary" style="width:auto;padding:.2rem .6rem" onclick="mv('+i+',1)">↓</button> '
-      +'<button class="contrast" style="width:auto;padding:.2rem .6rem" onclick="del('+i+')">✕</button></span></header>';
+    let h='<div class="block-head"><strong>'+NAMES[b.t]+'</strong>'
+      +'<button class="s secondary" onclick="mv('+i+',-1)">↑</button>'
+      +'<button class="s secondary" onclick="mv('+i+',1)">↓</button>'
+      +'<button class="s secondary" onclick="del('+i+')">✕</button></div>';
     if(b.t=='p')h+='<textarea oninput="BL['+i+'].text=this.value;vprev()">'+esc(b.text||'')+'</textarea>';
     if(b.t=='h')h+='<div class="grid"><label>Рівень 1–6<input value="'+(b.level||2)+'" oninput="BL['+i+'].level=this.value;vprev()"></label>'
       +'<label>Текст<textarea oninput="BL['+i+'].text=this.value;vprev()">'+esc(b.text||'')+'</textarea></label></div>';
     if(b.t=='slideshow'){
       h+='<input type="file" accept="image/*" multiple onchange="up('+i+',this.files)"><div class="thumbs">';
       (b.photos||[]).forEach((p,j)=>{
-        h+='<div class="thumb"><img src="'+p.url+'"><nav><button class="secondary" onclick="phmv('+i+','+j+',-1)">←</button>'
-          +'<button class="secondary" onclick="phmv('+i+','+j+',1)">→</button>'
-          +'<button class="contrast" onclick="phdel('+i+','+j+')">✕</button></nav></div>';
+        h+='<div class="thumb"><img src="'+p.url+'"><nav><button class="s secondary" onclick="phmv('+i+','+j+',-1)">←</button>'
+          +'<button class="s secondary" onclick="phmv('+i+','+j+',1)">→</button>'
+          +'<button class="s secondary" onclick="phdel('+i+','+j+')">✕</button></nav></div>';
       });
       h+='</div><label style="margin-top:.5rem">Короткий підпис (можна порожньо)<input value="'+esc(b.caption||'').replace(/"/g,'&quot;')+'" oninput="BL['+i+'].caption=this.value;vprev()"></label>';
     }
@@ -163,7 +161,7 @@ function vprev(){
       h+='</div>'+(b.caption?('<small>'+md(b.caption)+'</small>'):'')+'</div>';
     }
   }
-  $('pv').innerHTML=h||'—';
+  $('pv').innerHTML=h||'<small>Порожньо.</small>';
 }
 async function preview(){
   const r=await api('/api/preview','POST',{blocks:BL});
@@ -193,7 +191,7 @@ async function loadPosts(){
     const g=document.createElement('div');g.setAttribute('role','group');
     const e=document.createElement('button');e.className='secondary';e.textContent='Правити';
     e.onclick=async()=>{const q=await api('/api/posts/'+p.id);if(q.ok){BL=q.post.blocks;editing=p.id;render();vprev();preview();tab('c')}};
-    const x=document.createElement('button');x.className='contrast';x.textContent='Видалити';
+    const x=document.createElement('button');x.className='secondary';x.textContent='Видалити';
     x.onclick=async()=>{if(confirm('Видалити пост #'+p.message_id+'?')){await api('/api/delete','POST',{post_id:p.id});loadPosts()}};
     g.appendChild(e);g.appendChild(x);d.appendChild(g);w.appendChild(d);
   });
