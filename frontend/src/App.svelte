@@ -1,4 +1,5 @@
 <script>
+  import { dndzone } from 'svelte-dnd-action';
   let key = $state(localStorage.getItem('re_key') || '');
   let authed = $state(false);
   let channel = $state('');
@@ -82,15 +83,28 @@
     [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
   }
 
-  function phmv(bi, i, d) {
-    const p = blocks[bi].photos;
-    const j = i + d;
-    if (j < 0 || j >= p.length) return;
-    [p[i], p[j]] = [p[j], p[i]];
-  }
-
   function phdel(bi, i) {
     blocks[bi].photos.splice(i, 1);
+  }
+
+  const flipDurationMs = 200;
+
+  function dndOf(b) {
+    if (!b._dnd || b._dnd.length !== b.photos.length) {
+      b._dnd = b.photos.map((p) => ({ id: p.up }));
+    }
+    return b._dnd;
+  }
+
+  function dndConsider(bi, e) {
+    blocks[bi]._dnd = e.detail.items;
+  }
+
+  function dndFinalize(bi, e) {
+    const b = blocks[bi];
+    b._dnd = e.detail.items;
+    const order = new Map(b._dnd.map((d, k) => [d.id, k]));
+    b.photos.sort((x, y) => order.get(x.up) - order.get(y.up));
   }
 
   async function up(bi, files) {
@@ -229,14 +243,24 @@
                     multiple
                     onchange={(e) => up(i, e.currentTarget.files)}
                   />
-                  <div class="thumbs">
-                    {#each b.photos as p, j}
+                  <small>Фото (перетягни, щоб змінити порядок)</small>
+                  <div
+                    class="thumbs"
+                    use:dndzone={{ items: dndOf(b), flipDurationMs }}
+                    onconsider={(e) => dndConsider(i, e)}
+                    onfinalize={(e) => dndFinalize(i, e)}
+                  >
+                    {#each dndOf(b) as item (item.id)}
+                      {@const p = b.photos.find((x) => x.up === item.id)}
                       <div class="thumb">
-                        <img src={img(p)} alt="" />
+                        <img src={img(p)} alt="" draggable="false" />
                         <nav>
-                          <button class="s secondary" onclick={() => phmv(i, j, -1)}>←</button>
-                          <button class="s secondary" onclick={() => phmv(i, j, 1)}>→</button>
-                          <button class="s secondary" onclick={() => phdel(i, j)}>✕</button>
+                          <button
+                            class="s secondary"
+                            onclick={() => phdel(i, b.photos.indexOf(p))}
+                          >
+                            Прибрати
+                          </button>
                         </nav>
                       </div>
                     {/each}
