@@ -212,9 +212,11 @@
               <article style="margin: 0 0 0.75rem;">
                 <div class="block-head">
                   <strong>{NAMES[b.t]}</strong>
-                  <button type="button" class="s secondary" onclick={() => mv(i, -1)}>↑</button>
-                  <button type="button" class="s secondary" onclick={() => mv(i, 1)}>↓</button>
-                  <button type="button" class="s secondary" onclick={() => del(i)}>✕</button>
+                  <div class="actions">
+                    <button type="button" class="secondary" onclick={() => mv(i, -1)}>↑</button>
+                    <button type="button" class="secondary" onclick={() => mv(i, 1)}>↓</button>
+                    <button type="button" class="secondary" onclick={() => del(i)}>✕</button>
+                  </div>
                 </div>
                 {#if b.t === 'p'}
                   <textarea bind:value={b.text} placeholder="Текст абзацу"></textarea>
