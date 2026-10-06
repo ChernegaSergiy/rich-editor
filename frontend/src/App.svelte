@@ -7,6 +7,7 @@
   let view = $state('compose');
   let blocks = $state([]);
   let editing = $state(null);
+  let fileEls = $state([]);
   let chat = $state('');
   let foreignId = $state('');
   let result = $state('');
@@ -228,9 +229,9 @@
               <article style="margin: 0 0 0.75rem;">
                 <div class="block-head">
                   <strong>{NAMES[b.t]}</strong>
-                  <button class="s secondary" onclick={() => mv(i, -1)}>↑</button>
-                  <button class="s secondary" onclick={() => mv(i, 1)}>↓</button>
-                  <button class="s secondary" onclick={() => del(i)}>✕</button>
+                  <button type="button" class="s secondary" onclick={() => mv(i, -1)}>↑</button>
+                  <button type="button" class="s secondary" onclick={() => mv(i, 1)}>↓</button>
+                  <button type="button" class="s secondary" onclick={() => del(i)}>✕</button>
                 </div>
                 {#if b.t === 'p'}
                   <textarea bind:value={b.text} placeholder="Текст абзацу"></textarea>
@@ -240,36 +241,50 @@
                     <label>Текст<textarea bind:value={b.text}></textarea></label>
                   </div>
                 {:else if b.t === 'slideshow'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onchange={(e) => up(i, e.currentTarget.files)}
-                  />
-                  <small>Фото (перетягни, щоб змінити порядок)</small>
-                  <div
-                    class="media-grid"
-                    use:dndzone={{ items: b._dnd ?? [], flipDurationMs }}
-                    onconsider={(e) => dndConsider(i, e)}
-                    onfinalize={(e) => dndFinalize(i, e)}
-                  >
-                    {#each b._dnd ?? [] as item (item.id)}
-                      {@const p = b.photos.find((x) => x.up === item.id)}
-                      <div>
-                        <div class="media-item">
-                          <img src={img(p)} alt="" draggable="false" />
+                  <fieldset>
+                    <legend>Фото (перетягни, щоб змінити порядок)</legend>
+                    <div
+                      class="media-grid"
+                      use:dndzone={{ items: b._dnd ?? [], flipDurationMs }}
+                      onconsider={(e) => dndConsider(i, e)}
+                      onfinalize={(e) => dndFinalize(i, e)}
+                    >
+                      {#each b._dnd ?? [] as item (item.id)}
+                        {@const p = b.photos.find((x) => x.up === item.id)}
+                        <div>
+                          <div class="media-item">
+                            <img src={img(p)} alt="" draggable="false" />
+                          </div>
+                          <div class="media-controls">
+                            <button
+                              type="button"
+                              class="secondary outline"
+                              style="color: var(--pico-del-color); border-color: var(--pico-del-color);"
+                              onclick={() => phdel(i, b.photos.indexOf(p))}
+                            >
+                              Прибрати
+                            </button>
+                          </div>
                         </div>
-                        <div class="media-controls">
-                          <button
-                            class="secondary outline"
-                            onclick={() => phdel(i, b.photos.indexOf(p))}
-                          >
-                            Прибрати
-                          </button>
-                        </div>
-                      </div>
-                    {/each}
-                  </div>
+                      {/each}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      style="display: none;"
+                      bind:this={fileEls[i]}
+                      onchange={(e) => up(i, e.currentTarget.files)}
+                    />
+                    <button
+                      type="button"
+                      class="secondary"
+                      style="border-radius: 99px;"
+                      onclick={() => fileEls[i].click()}
+                    >
+                      + Додати фото
+                    </button>
+                  </fieldset>
                   <label style="margin-top: 0.5rem;">
                     Короткий підпис (можна порожньо)
                     <input bind:value={b.caption} />
@@ -278,10 +293,10 @@
               </article>
             {/each}
             <div role="group">
-              <button class="secondary" onclick={() => add('p')}>+ Абзац</button>
-              <button class="secondary" onclick={() => add('h')}>+ Заголовок</button>
-              <button class="secondary" onclick={() => add('slideshow')}>+ Слайдшоу</button>
-              <button class="secondary" onclick={() => add('divider')}>+ Розділювач</button>
+              <button type="button" class="secondary" onclick={() => add('p')}>+ Абзац</button>
+              <button type="button" class="secondary" onclick={() => add('h')}>+ Заголовок</button>
+              <button type="button" class="secondary" onclick={() => add('slideshow')}>+ Слайдшоу</button>
+              <button type="button" class="secondary" onclick={() => add('divider')}>+ Розділювач</button>
             </div>
             <p><small>Розмітка: **жирний**, *курсив*, `код`, [текст](https://url). Довгий текст — абзацами, а не підписом.</small></p>
           </article>
@@ -321,8 +336,8 @@
               <label>message_id для правки чужого<input bind:value={foreignId} placeholder="порожньо — свій" /></label>
             </div>
             <div role="group">
-              <button onclick={send}>Надіслати новий</button>
-              <button class="secondary" onclick={saveEdit}>Зберегти правку</button>
+              <button type="button" onclick={send}>Надіслати новий</button>
+              <button type="button" class="secondary" onclick={saveEdit}>Зберегти правку</button>
             </div>
             <p>{@html result}</p>
           </article>
@@ -330,7 +345,7 @@
           <article>
             <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
               <h2>Надіслані дописи</h2>
-              <button class="secondary" onclick={loadPosts}>Оновити</button>
+              <button type="button" class="secondary" onclick={loadPosts}>Оновити</button>
             </div>
             {#each posts as p}
               <hr />
@@ -340,8 +355,8 @@
                 <small>{p.excerpt}</small>
               </div>
               <div role="group">
-                <button class="secondary" onclick={() => editPost(p)}>Правити</button>
-                <button class="secondary" onclick={() => removePost(p)}>Видалити</button>
+                <button type="button" class="secondary" onclick={() => editPost(p)}>Правити</button>
+                <button type="button" class="secondary" onclick={() => removePost(p)}>Видалити</button>
               </div>
             {:else}
               <p>Поки порожньо.</p>
