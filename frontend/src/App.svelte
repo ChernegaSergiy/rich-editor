@@ -1,5 +1,5 @@
 <script>
-  import { dndzone } from 'svelte-dnd-action';
+  import SlideshowEditor from './SlideshowEditor.svelte';
   let key = $state(localStorage.getItem('re_key') || '');
   let authed = $state(false);
   let channel = $state('');
@@ -7,7 +7,6 @@
   let view = $state('compose');
   let blocks = $state([]);
   let editing = $state(null);
-  let fileEls = $state([]);
   let chat = $state('');
   let foreignId = $state('');
   let result = $state('');
@@ -82,46 +81,6 @@
     const j = i + d;
     if (j < 0 || j >= blocks.length) return;
     [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
-  }
-
-  function phdel(bi, i) {
-    blocks[bi].photos.splice(i, 1);
-  }
-
-  const flipDurationMs = 200;
-  const synced = new Map();
-
-  $effect(() => {
-    for (const b of blocks) {
-      const ids = b.photos.map((p) => p.up).join();
-      if (synced.get(b) !== ids) {
-        synced.set(b, ids);
-        b._dnd = b.photos.map((p) => ({ id: p.up }));
-      }
-    }
-  });
-
-  function dndConsider(bi, e) {
-    blocks[bi]._dnd = e.detail.items;
-  }
-
-  function dndFinalize(bi, e) {
-    const b = blocks[bi];
-    const byId = new Map(b.photos.map((p) => [p.up, p]));
-    const next = [];
-    for (const d of e.detail.items) {
-      const ph = byId.get(d.id);
-      if (ph) next.push(ph);
-    }
-    for (const p of b.photos) {
-      if (!next.includes(p)) next.push(p);
-    }
-    b.photos = next;
-    b._dnd = next.map((p) => ({ id: p.up }));
-    synced.set(
-      b,
-      next.map((p) => p.up).join(),
-    );
   }
 
   async function up(bi, files) {
@@ -253,50 +212,7 @@
                     <label>Текст<textarea bind:value={b.text}></textarea></label>
                   </div>
                 {:else if b.t === 'slideshow'}
-                  <fieldset>
-                    <legend>Фото (перетягни, щоб змінити порядок)</legend>
-                    <div
-                      class="media-grid"
-                      use:dndzone={{ items: b._dnd ?? [], flipDurationMs }}
-                      onconsider={(e) => dndConsider(i, e)}
-                      onfinalize={(e) => dndFinalize(i, e)}
-                    >
-                      {#each b._dnd ?? [] as item (item.id)}
-                        {@const p = b.photos.find((x) => x.up === item.id)}
-                        <div>
-                          <div class="media-item">
-                            <img src={img(p)} alt="" draggable="false" />
-                          </div>
-                          <div class="media-controls">
-                            <button
-                              type="button"
-                              class="secondary outline"
-                              style="color: var(--pico-del-color); border-color: var(--pico-del-color);"
-                              onclick={() => phdel(i, b.photos.indexOf(p))}
-                            >
-                              Прибрати
-                            </button>
-                          </div>
-                        </div>
-                      {/each}
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      style="display: none;"
-                      bind:this={fileEls[i]}
-                      onchange={(e) => up(i, e.currentTarget.files)}
-                    />
-                    <button
-                      type="button"
-                      class="secondary"
-                      style="border-radius: 99px;"
-                      onclick={() => fileEls[i].click()}
-                    >
-                      + Додати фото
-                    </button>
-                  </fieldset>
+                  <SlideshowEditor bind:photos={b.photos} authKey={key} onupload={(f) => up(i, f)} />
                   <label style="margin-top: 0.5rem;">
                     Короткий підпис (можна порожньо)
                     <input bind:value={b.caption} />
