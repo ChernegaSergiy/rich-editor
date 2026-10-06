@@ -10,7 +10,6 @@
   let chat = $state('');
   let foreignId = $state('');
   let result = $state('');
-  let src = $state('—');
   let posts = $state([]);
   let banner = $state('');
   let bannerErr = $state(false);
@@ -105,13 +104,7 @@
     }
   }
 
-  async function preview() {
-    const r = await api('/api/preview', 'POST', { blocks });
-    src = r.ok ? r.html : 'Помилка: ' + r.description;
-  }
-
   async function send() {
-    await preview();
     const r = await api('/api/send', 'POST', { chat, blocks });
     result = r.ok
       ? `Опубліковано: <a target="_blank" href="${r.link}">${r.link}</a>`
@@ -119,7 +112,6 @@
   }
 
   async function saveEdit() {
-    await preview();
     const b = { blocks };
     if (editing) b.post_id = editing;
     else if (foreignId.trim()) b.message_id = +foreignId.trim();
@@ -145,7 +137,6 @@
       blocks = q.post.blocks;
       editing = p.id;
       view = 'compose';
-      preview();
     }
   }
 
@@ -288,10 +279,6 @@
             {:else}
               <small>Порожньо.</small>
             {/each}
-            <details>
-              <summary>Точний HTML для Telegram</summary>
-              <pre class="src">{src}</pre>
-            </details>
           </article>
 
           <article>
