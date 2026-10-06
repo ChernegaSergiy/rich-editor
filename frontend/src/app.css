@@ -210,14 +210,80 @@ pre.src {
   flex: 1;
 }
 
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--pico-form-element-background-color);
+  color: var(--pico-muted-color);
+}
+
+.app-banner {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 1rem 2rem;
+  background-color: var(--pico-card-background-color);
+  color: var(--pico-color);
+  border-radius: var(--pico-border-radius);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  border-left: 4px solid var(--primary);
+  animation: slideIn 0.3s ease-out;
+}
+
+.app-banner.app-error {
+  border-left-color: var(--pico-del-color);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.del-btn {
+  color: var(--pico-del-color);
+  border-color: var(--pico-del-color);
+}
+
 @media (max-width: 768px) {
   .dashboard-layout {
     flex-direction: column;
   }
   .sidebar {
     width: 100%;
+    height: auto;
     border-right: none;
     border-bottom: 1px solid var(--pico-muted-border-color);
+    padding: 1rem;
+  }
+  .sidebar-header {
+    padding-bottom: 1rem;
+    justify-content: center;
+  }
+  .sidebar nav ul {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  .sidebar nav ul li {
+    flex: 1;
+    text-align: center;
+  }
+  .sidebar nav ul li a {
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+  }
+  .sidebar-footer {
+    display: none;
+  }
+  .topbar {
+    padding: 0 1rem;
+    min-height: 56px;
+  }
+  .content-area {
+    padding: 1rem;
   }
   body {
     overflow: auto;
