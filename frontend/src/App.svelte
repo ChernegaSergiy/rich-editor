@@ -189,7 +189,6 @@
           type="password"
           bind:value={key}
           autocomplete="off"
-          autofocus
           placeholder="ADMIN_KEY"
           aria-label="ADMIN_KEY"
         />
