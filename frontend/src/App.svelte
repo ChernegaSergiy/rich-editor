@@ -89,12 +89,13 @@
 
   const flipDurationMs = 200;
 
-  function dndOf(b) {
-    if (!b._dnd || b._dnd.length !== b.photos.length) {
-      b._dnd = b.photos.map((p) => ({ id: p.up }));
+  $effect(() => {
+    for (const b of blocks) {
+      const ids = b.photos.map((p) => p.up);
+      const cur = (b._dnd || []).map((d) => d.id);
+      if (cur.join() !== ids.join()) b._dnd = ids.map((id) => ({ id }));
     }
-    return b._dnd;
-  }
+  });
 
   function dndConsider(bi, e) {
     blocks[bi]._dnd = e.detail.items;
@@ -246,11 +247,11 @@
                   <small>Фото (перетягни, щоб змінити порядок)</small>
                   <div
                     class="thumbs"
-                    use:dndzone={{ items: dndOf(b), flipDurationMs }}
+                    use:dndzone={{ items: b._dnd ?? [], flipDurationMs }}
                     onconsider={(e) => dndConsider(i, e)}
                     onfinalize={(e) => dndFinalize(i, e)}
                   >
-                    {#each dndOf(b) as item (item.id)}
+                    {#each b._dnd ?? [] as item (item.id)}
                       {@const p = b.photos.find((x) => x.up === item.id)}
                       <div class="thumb">
                         <img src={img(p)} alt="" draggable="false" />
