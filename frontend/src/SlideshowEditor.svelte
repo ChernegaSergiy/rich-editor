@@ -44,7 +44,7 @@
 </script>
 
 <fieldset>
-  <legend>Фото (перетягни, щоб змінити порядок)</legend>
+  <legend>Photos (drag to reorder)</legend>
   {#if dndItems.length > 0}
     <div
       class="media-grid"
@@ -64,7 +64,7 @@
               style="color: var(--pico-del-color); border-color: var(--pico-del-color);"
               onclick={() => removeById(item.id)}
             >
-              Прибрати
+              Remove
             </button>
           </div>
         </div>
@@ -80,6 +80,6 @@
     onchange={(e) => onupload(e.currentTarget.files)}
   />
   <button type="button" class="secondary" style="border-radius: 99px; margin-bottom: 1rem;" onclick={() => fileEl.click()}>
-    + Додати фото
+    + Add photo
   </button>
 </fieldset>
