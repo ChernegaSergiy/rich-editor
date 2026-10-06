@@ -226,6 +226,11 @@ pre.src {
   color: var(--pico-muted-color);
 }
 
+.badge.active {
+  background-color: var(--primary);
+  color: #fff;
+}
+
 .app-banner {
   position: fixed;
   bottom: 2rem;
