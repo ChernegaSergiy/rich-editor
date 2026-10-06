@@ -106,6 +106,7 @@ pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 let K=localStorage.getItem('re_key')||'';
 let BL=[];let editing=null;
 const $=id=>document.getElementById(id);
+const U=u=>u+'?key='+encodeURIComponent(K);
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function md(t){
   let o=esc(t);
@@ -170,7 +171,7 @@ function render(){
     if(b.t=='slideshow'){
       h+='<input type="file" accept="image/*" multiple onchange="up('+i+',this.files)"><div class="thumbs">';
       (b.photos||[]).forEach((p,j)=>{
-        h+='<div class="thumb"><img src="'+p.url+'"><nav><button class="s secondary" onclick="phmv('+i+','+j+',-1)">←</button>'
+        h+='<div class="thumb"><img src="'+U(p.url)+'"><nav><button class="s secondary" onclick="phmv('+i+','+j+',-1)">←</button>'
           +'<button class="s secondary" onclick="phmv('+i+','+j+',1)">→</button>'
           +'<button class="s secondary" onclick="phdel('+i+','+j+')">✕</button></nav></div>';
       });
@@ -188,7 +189,7 @@ function vprev(){
     else if(b.t=='divider')h+='<hr>';
     else if(b.t=='slideshow'){
       h+='<div class="bubble"><div class="grid">';
-      (b.photos||[]).forEach(p=>{h+='<img src="'+p.url+'">'});
+      (b.photos||[]).forEach(p=>{h+='<img src="'+U(p.url)+'">'});
       h+='</div>'+(b.caption?('<small>'+md(b.caption)+'</small>'):'')+'</div>';
     }
   }
