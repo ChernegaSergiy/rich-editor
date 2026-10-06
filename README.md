@@ -32,3 +32,7 @@ cp .env.example .env   # BOT_TOKEN, ADMIN_KEY, CHANNEL
 python3 app/backend.py
 # http://127.0.0.1:8080
 ```
+
+## License
+
+This project is licensed under the CSSM Unlimited License v2.0 (CSSM-ULv2). See the [LICENSE](LICENSE) file for details.
