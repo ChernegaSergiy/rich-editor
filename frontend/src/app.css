@@ -198,12 +198,6 @@ body {
   display: block;
 }
 
-pre.src {
-  font-size: 0.75rem;
-  max-height: 220px;
-  overflow: auto;
-}
-
 .block-head {
   display: flex;
   align-items: center;
