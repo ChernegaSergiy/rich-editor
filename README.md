@@ -20,6 +20,7 @@ app/
 Dockerfile
 docker-compose.yml
 rich.conf           # nginx vhost for nginx-proxy
+.env.example        # BOT_TOKEN, ADMIN_KEY, CHANNEL (copy to .env)
 ```
 
 ## Local run
