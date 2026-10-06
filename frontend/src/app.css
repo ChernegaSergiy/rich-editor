@@ -153,9 +153,16 @@ body {
   display: block;
 }
 .media-controls {
+  display: flex;
+  justify-content: space-between;
   margin-top: 0.5rem;
+  gap: 0.25rem;
 }
 .media-controls button {
+  padding: 0.15rem 0;
+  margin: 0;
+  flex: 1;
+  font-size: 0.8rem;
   color: var(--pico-del-color);
   border-color: var(--pico-del-color);
 }
