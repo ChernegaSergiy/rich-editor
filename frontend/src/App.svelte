@@ -288,7 +288,6 @@
             <p>{@html result}</p>
           </article>
         {:else}
-          <article>
           <div class="page-header">
             <div>
               <h2>Надіслані дописи</h2>
@@ -342,7 +341,6 @@
               {/each}
             </div>
           {/if}
-          </article>
         {/if}
       </div>
     </div>
