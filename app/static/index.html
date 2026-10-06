@@ -10,6 +10,10 @@
 .thumb img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--pico-border-radius);display:block;border:1px solid var(--pico-muted-border-color)}
 .thumb nav{display:flex;gap:.25rem;margin-top:.25rem}
 button.s{width:auto;padding:.15rem .6rem;font-size:.85rem;margin:0}
+:root{--primary:#1a73e8}
+.auth-layout{display:flex;align-items:center;justify-content:center;min-height:100dvh}
+.auth-card{width:100%;max-width:480px;padding:3rem;border-radius:var(--pico-border-radius);box-shadow:0 10px 30px rgba(0,0,0,.1);background-color:var(--pico-card-background-color);border:1px solid var(--pico-muted-border-color);text-align:center}
+.auth-card button{width:100%;border-radius:99px}
 .bubble{border:1px solid var(--pico-muted-border-color);border-radius:var(--pico-border-radius);padding:.75rem 1rem;margin-bottom:.5rem}
 .bubble .grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:.5rem 0}
 .bubble .grid img{width:100%;border-radius:4px;display:block}
@@ -19,16 +23,17 @@ pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 </style>
 </head>
 <body>
-<main class="container" id="gate">
-<article style="max-width:440px;margin:10vh auto">
-<h1>Rich-редактор</h1>
-<p>Дописи в канал без Premium: текст — абзацами, фото — слайдшоу.</p>
+<main class="container" id="gate" style="padding:0">
+<div class="auth-layout"><div class="auth-card">
+<h2 style="margin-bottom:.5rem;color:var(--primary)">Rich-редактор</h2>
+<p style="color:var(--pico-muted-color);margin-bottom:2rem">Дописи в канал без Premium: текст — абзацами, фото — слайдшоу.</p>
 <form onsubmit="login();return false">
-<label>ADMIN_KEY<input type="password" id="key" autocomplete="off" autofocus></label>
+<input type="password" id="key" autocomplete="off" autofocus placeholder="ADMIN_KEY" aria-label="ADMIN_KEY">
 <button type="submit">Увійти</button>
 </form>
+<p style="margin-top:1.5rem;font-size:.85rem;color:var(--pico-muted-color)">Ключ зберігається тільки в цьому браузері.</p>
 <p><small id="gate_err" style="color:var(--pico-del-color)"></small></p>
-</article>
+</div></div>
 </main>
 
 <main class="container" id="app" style="display:none">
