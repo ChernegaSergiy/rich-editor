@@ -1,4 +1,6 @@
 .env
 data/
+app/static/dist/
+frontend/node_modules/
 __pycache__/
 *.pyc
