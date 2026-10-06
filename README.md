@@ -1,5 +1,7 @@
 # rich-editor
 
+[![Docker Image CI](https://github.com/ChernegaSergiy/rich-editor/actions/workflows/docker-image.yml/badge.svg)](https://github.com/ChernegaSergiy/rich-editor/actions/workflows/docker-image.yml)
+
 Web editor for Telegram Rich Messages (Bot API 10.3, `sendRichMessage`).
 
 An admin with no Premium composes a post in the browser — body text in paragraphs, photos as a slideshow — and publishes it to the channel via bot. Rule: long text goes into the post body (`paragraph`), not into the gray caption (`caption`).
