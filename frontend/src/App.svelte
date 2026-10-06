@@ -245,23 +245,25 @@
                   />
                   <small>Фото (перетягни, щоб змінити порядок)</small>
                   <div
-                    class="thumbs"
+                    class="media-grid"
                     use:dndzone={{ items: b._dnd ?? [], flipDurationMs }}
                     onconsider={(e) => dndConsider(i, e)}
                     onfinalize={(e) => dndFinalize(i, e)}
                   >
                     {#each b._dnd ?? [] as item (item.id)}
                       {@const p = b.photos.find((x) => x.up === item.id)}
-                      <div class="thumb">
-                        <img src={img(p)} alt="" draggable="false" />
-                        <nav>
+                      <div>
+                        <div class="media-item">
+                          <img src={img(p)} alt="" draggable="false" />
+                        </div>
+                        <div class="media-controls">
                           <button
-                            class="s secondary"
+                            class="secondary outline"
                             onclick={() => phdel(i, b.photos.indexOf(p))}
                           >
                             Прибрати
                           </button>
-                        </nav>
+                        </div>
                       </div>
                     {/each}
                   </div>
