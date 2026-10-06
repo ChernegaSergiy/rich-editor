@@ -107,9 +107,21 @@
 
   function dndFinalize(bi, e) {
     const b = blocks[bi];
-    b._dnd = e.detail.items;
-    const order = new Map(b._dnd.map((d, k) => [d.id, k]));
-    b.photos.sort((x, y) => order.get(x.up) - order.get(y.up));
+    const byId = new Map(b.photos.map((p) => [p.up, p]));
+    const next = [];
+    for (const d of e.detail.items) {
+      const ph = byId.get(d.id);
+      if (ph) next.push(ph);
+    }
+    for (const p of b.photos) {
+      if (!next.includes(p)) next.push(p);
+    }
+    b.photos = next;
+    b._dnd = next.map((p) => ({ id: p.up }));
+    synced.set(
+      b,
+      next.map((p) => p.up).join(),
+    );
   }
 
   async function up(bi, files) {
