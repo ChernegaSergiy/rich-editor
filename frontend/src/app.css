@@ -132,26 +132,32 @@ body {
   border-color: var(--primary);
 }
 
-.thumbs {
+.media-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
   margin-top: 0.5rem;
 }
-
-.thumb img {
-  width: 100%;
+.media-item {
+  position: relative;
   aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: var(--pico-border-radius);
-  display: block;
-  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--pico-muted-border-color);
+  background-color: var(--pico-form-element-background-color);
 }
-
-.thumb nav {
-  display: flex;
-  gap: 0.25rem;
-  margin-top: 0.25rem;
+.media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.media-controls {
+  margin-top: 0.5rem;
+}
+.media-controls button {
+  color: var(--pico-del-color);
+  border-color: var(--pico-del-color);
 }
 
 button.s {
