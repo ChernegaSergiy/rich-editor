@@ -88,12 +88,15 @@
   }
 
   const flipDurationMs = 200;
+  const synced = new Map();
 
   $effect(() => {
     for (const b of blocks) {
-      const ids = b.photos.map((p) => p.up);
-      const cur = (b._dnd || []).map((d) => d.id);
-      if (cur.join() !== ids.join()) b._dnd = ids.map((id) => ({ id }));
+      const ids = b.photos.map((p) => p.up).join();
+      if (synced.get(b) !== ids) {
+        synced.set(b, ids);
+        b._dnd = b.photos.map((p) => ({ id: p.up }));
+      }
     }
   });
 
