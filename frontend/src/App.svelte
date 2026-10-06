@@ -289,24 +289,59 @@
           </article>
         {:else}
           <article>
-            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="page-header">
+            <div>
               <h2>Надіслані дописи</h2>
-              <button type="button" class="secondary" onclick={loadPosts}>Оновити</button>
             </div>
-            {#each posts as p}
-              <hr />
-              <div>
-                <a target="_blank" href={p.link}>#{p.message_id}</a>
-                · {p.chat} · {p.created_at.slice(0, 16).replace('T', ' ')}<br />
-                <small>{p.excerpt}</small>
-              </div>
-              <div role="group">
-                <button type="button" class="secondary" onclick={() => editPost(p)}>Правити</button>
-                <button type="button" class="secondary" onclick={() => removePost(p)}>Видалити</button>
-              </div>
-            {:else}
-              <p>Поки порожньо.</p>
-            {/each}
+            <button
+              type="button"
+              class="secondary"
+              style="border-radius: 99px; padding: 0.5rem 1.5rem; margin: 0;"
+              onclick={loadPosts}
+            >
+              Оновити
+            </button>
+          </div>
+          {#if posts.length === 0}
+            <article
+              style="text-align: center; padding: 3rem; background-color: transparent; border: 2px dashed var(--pico-muted-border-color); box-shadow: none;"
+            >
+              <p style="color: var(--pico-muted-color); margin: 0;">Поки порожньо.</p>
+            </article>
+          {:else}
+            <div class="card-grid">
+              {#each posts as p}
+                <article class="card">
+                  <header>
+                    <a target="_blank" href={p.link}>#{p.message_id}</a>
+                  </header>
+                  <div class="content">
+                    <span class="badge">{p.chat}</span>
+                    <div class="moh-meta">{p.created_at.slice(0, 16).replace('T', ' ')}</div>
+                    <div class="moh-meta">{p.excerpt}</div>
+                  </div>
+                  <footer>
+                    <button
+                      type="button"
+                      class="secondary outline"
+                      style="border-radius: 99px; margin: 0; padding: 0.35rem 1rem; font-size: 0.85rem;"
+                      onclick={() => editPost(p)}
+                    >
+                      Правити
+                    </button>
+                    <button
+                      type="button"
+                      class="secondary outline"
+                      style="border-radius: 99px; margin: 0; padding: 0.35rem 1rem; font-size: 0.85rem; color: var(--pico-del-color); border-color: var(--pico-del-color);"
+                      onclick={() => removePost(p)}
+                    >
+                      Видалити
+                    </button>
+                  </footer>
+                </article>
+              {/each}
+            </div>
+          {/if}
           </article>
         {/if}
       </div>
