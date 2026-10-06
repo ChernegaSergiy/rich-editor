@@ -79,7 +79,7 @@
     bind:this={fileEl}
     onchange={(e) => onupload(e.currentTarget.files)}
   />
-  <button type="button" class="secondary" style="border-radius: 99px;" onclick={() => fileEl.click()}>
+  <button type="button" class="secondary" style="border-radius: 99px; margin-bottom: 1rem;" onclick={() => fileEl.click()}>
     + Додати фото
   </button>
 </fieldset>
