@@ -6,25 +6,41 @@
 <title>Rich-редактор · @nl_pe</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
 <style>
+:root{--primary:#1a73e8;--sidebar-width:260px}
+body{margin:0;padding:0;width:100vw;height:100dvh;overflow:hidden;background-color:var(--pico-background-color)}
+#app{width:100%;height:100%;display:flex}
+.dashboard-layout{display:flex;width:100%;height:100%}
+.sidebar{width:var(--sidebar-width);background-color:var(--pico-card-background-color);border-right:1px solid var(--pico-muted-border-color);display:flex;flex-direction:column;padding:1rem;flex-shrink:0}
+.sidebar-header{font-size:1.25rem;font-weight:700;padding:1rem 0 2rem;color:var(--primary)}
+.sidebar nav ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.25rem}
+.sidebar nav ul li a{display:block;padding:.75rem 1rem;border-radius:var(--pico-border-radius);color:var(--pico-color);text-decoration:none;font-weight:500;cursor:pointer}
+.sidebar nav ul li a:hover{background-color:var(--pico-form-element-background-color)}
+.sidebar nav ul li a.active{background-color:var(--primary);color:#fff}
+.sidebar-footer{margin-top:auto;border-top:1px solid var(--pico-muted-border-color);padding-top:1rem}
+.main-content{flex:1;display:flex;flex-direction:column;overflow-y:auto}
+.topbar{min-height:64px;flex-shrink:0;background-color:var(--pico-card-background-color);border-bottom:1px solid var(--pico-muted-border-color);display:flex;align-items:center;justify-content:space-between;padding:.5rem 2rem;gap:1rem}
+.topbar h1{margin:0;font-size:1.25rem}
+.content-area{padding:2rem;max-width:1200px;margin:0 auto;width:100%}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.page-header h2{margin:0;font-size:1.5rem}
+.auth-layout{display:flex;align-items:center;justify-content:center;min-height:100dvh;width:100vw;background-color:var(--pico-background-color)}
+.auth-card{width:100%;max-width:480px;padding:3rem;border-radius:var(--pico-border-radius);box-shadow:0 10px 30px rgba(0,0,0,.1);background-color:var(--pico-card-background-color);border:1px solid var(--pico-muted-border-color);text-align:center}
+.auth-card button{width:100%;border-radius:99px;background-color:var(--primary);border-color:var(--primary)}
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;margin-top:.5rem}
 .thumb img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--pico-border-radius);display:block;border:1px solid var(--pico-muted-border-color)}
 .thumb nav{display:flex;gap:.25rem;margin-top:.25rem}
 button.s{width:auto;padding:.15rem .6rem;font-size:.85rem;margin:0}
-:root{--primary:#1a73e8}
-.auth-layout{display:flex;align-items:center;justify-content:center;min-height:100dvh}
-.auth-card{width:100%;max-width:480px;padding:3rem;border-radius:var(--pico-border-radius);box-shadow:0 10px 30px rgba(0,0,0,.1);background-color:var(--pico-card-background-color);border:1px solid var(--pico-muted-border-color);text-align:center}
-.auth-card button{width:100%;border-radius:99px}
 .bubble{border:1px solid var(--pico-muted-border-color);border-radius:var(--pico-border-radius);padding:.75rem 1rem;margin-bottom:.5rem}
 .bubble .grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:.5rem 0}
 .bubble .grid img{width:100%;border-radius:4px;display:block}
 pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 .block-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
 .block-head strong{flex:1}
+@media (max-width:768px){.sidebar{width:100%;border-right:none;border-bottom:1px solid var(--pico-muted-border-color)}.dashboard-layout{flex-direction:column}body{overflow:auto}}
 </style>
 </head>
 <body>
-<main class="container" id="gate" style="padding:0">
-<div class="auth-layout"><div class="auth-card">
+<div class="auth-layout" id="gate"><div class="auth-card">
 <h2 style="margin-bottom:.5rem;color:var(--primary)">Rich-редактор</h2>
 <p style="color:var(--pico-muted-color);margin-bottom:2rem">Дописи в канал без Premium: текст — абзацами, фото — слайдшоу.</p>
 <form onsubmit="login();return false">
@@ -32,19 +48,25 @@ pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 <button type="submit">Увійти</button>
 </form>
 <p style="margin-top:1.5rem;font-size:.85rem;color:var(--pico-muted-color)">Ключ зберігається тільки в цьому браузері.</p>
-<p><small id="gate_err" style="color:var(--pico-del-color)"></small></p>
+<p><small id="gate_err"></small></p>
 </div></div>
-</main>
 
-<main class="container" id="app" style="display:none">
-<h1>Rich-редактор · <small id="ch"></small></h1>
-<div role="group">
-<button id="tab_c" onclick="tab('c')">Допис</button>
-<button id="tab_p" class="secondary" onclick="tab('p')">Надіслані</button>
-</div>
+<div id="app" style="display:none"><div class="dashboard-layout">
+<aside class="sidebar">
+<div class="sidebar-header">Rich-редактор</div>
+<nav><ul>
+<li><a id="nav_c" class="active" onclick="tab('c')">Допис</a></li>
+<li><a id="nav_p" onclick="tab('p')">Надіслані</a></li>
+</ul></nav>
+<div class="sidebar-footer"><small id="ch"></small></div>
+</aside>
+<div class="main-content">
+<div class="topbar"><h1 id="title">Новий допис</h1><small id="editinfo"></small></div>
+<div class="content-area">
 
 <section id="pane_c">
-<article><h2>Блоки</h2><div id="blocks"></div>
+<div class="page-header"><h2>Блоки</h2></div>
+<article><div id="blocks"></div>
 <div role="group">
 <button class="secondary" onclick="add('p')">+ Абзац</button>
 <button class="secondary" onclick="add('h')">+ Заголовок</button>
@@ -67,17 +89,18 @@ pre.src{font-size:.75rem;max-height:220px;overflow:auto}
 <button onclick="send()">Надіслати новий</button>
 <button class="secondary" onclick="saveEdit()">Зберегти правку</button>
 </div>
-<p><small id="editinfo"></small></p>
 <p id="res"></p>
 </article>
 </section>
 
 <section id="pane_p" style="display:none">
-<article><h2>Надіслані дописи</h2>
-<button class="secondary" onclick="loadPosts()">Оновити</button>
-<div id="posts"></div></article>
+<div class="page-header"><h2>Надіслані дописи</h2><button class="secondary" onclick="loadPosts()">Оновити</button></div>
+<article><div id="posts"></div></article>
 </section>
-</main>
+
+</div>
+</div>
+</div></div>
 
 <script>
 let K=localStorage.getItem('re_key')||'';
@@ -102,16 +125,17 @@ async function login(){
   const r=await api('/api/config');if(r.ok){enter()}else{$('gate_err').textContent='Невірний ключ'}
 }
 async function enter(){
-  $('gate').style.display='none';$('app').style.display='block';
+  $('gate').style.display='none';$('app').style.display='flex';
   const r=await api('/api/config');
   $('ch').textContent=r.channel;$('chat').value=r.channel;
   if(!BL.length)add('slideshow');
 }
 function tab(t){
-  $('tab_c').className=t=='c'?'':'secondary';
-  $('tab_p').className=t=='p'?'':'secondary';
+  $('nav_c').className=t=='c'?'active':'';
+  $('nav_p').className=t=='p'?'active':'';
   $('pane_c').style.display=t=='c'?'block':'none';
   $('pane_p').style.display=t=='p'?'block':'none';
+  $('title').textContent=t=='c'?'Новий допис':'Надіслані';
   if(t=='p')loadPosts();
 }
 function add(t){
