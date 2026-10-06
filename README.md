@@ -1,28 +1,31 @@
 # rich-editor
 
-Веб-редактор Telegram Rich-повідомлень (Bot API 10.3, `sendRichMessage`).
+Web editor for Telegram Rich Messages (Bot API 10.3, `sendRichMessage`).
 
-Адмін без Premium збирає допис у браузері — текст абзацами, слайдшоу з фото — і публікує в канал ботом. Правило: довгий текст іде тілом допису (`paragraph`), а не сірим підписом (`caption`).
+An admin with no Premium composes a post in the browser — body text in
+paragraphs, photos as a slideshow — and publishes it to the channel via bot.
+Rule: long text goes into the post body (`paragraph`), not into the gray
+caption (`caption`).
 
-## Стек
+## Stack
 
-- Backend: Python 3.12, тільки stdlib (без залежностей)
-- Frontend: один статичний `index.html`, vanilla JS
-- Зберігання: SQLite + `data/uploads` (пости, `file_id` для редагування без перезаливу)
-- Деплой: Docker → `blog-server`, мережа `proxy-net`, домен `rich.chernega.eu.org`
+- Backend: Python 3.12, stdlib only (zero dependencies)
+- Frontend: single static `index.html`, Pico.css + vanilla JS
+- Storage: SQLite + `data/uploads` (posts, `file_id`s for edit reuse)
+- Deploy: Docker → `blog-server`, `proxy-net` network, `rich.chernega.eu.org`
 
-## Структура (план)
+## Layout
 
 ```
 app/
-  backend.py        # HTTP-сервер, Telegram API, збірка HTML
-  static/index.html # редактор блоків, превʼю, список постів
+  backend.py        # HTTP server, Telegram API, HTML builder
+  static/index.html # block editor, preview, post list
 Dockerfile
 docker-compose.yml
-rich.conf           # nginx vhost для nginx-proxy
+rich.conf           # nginx vhost for nginx-proxy
 ```
 
-## Локальний запуск
+## Local run
 
 ```sh
 cp .env.example .env   # BOT_TOKEN, ADMIN_KEY, CHANNEL
