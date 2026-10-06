@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rich-редактор · @nl_pe</title>
+<style>
+:root{--bg:#0f1419;--card:#1a2230;--line:#2a3850;--tx:#e8eef6;--mut:#8fa1b8;--acc:#2f9e44}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+h1{font-size:20px;margin:8px 0}h2{font-size:16px;margin:0 0 8px}
+textarea,input[type=text]{width:100%;background:#0d1218;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:8px;font:inherit}
+textarea{min-height:70px;resize:vertical}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;margin:4px 4px 4px 0}
+button.ghost{background:#2a3850}
+button.danger{background:#c0392b}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mut{color:var(--mut);font-size:13px}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.thumb{position:relative;width:96px}.thumb img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.thumb .ctl{display:flex;gap:2px;margin-top:2px}.thumb .ctl button{padding:2px 6px;font-size:12px;margin:0}
+pre{background:#0d1218;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;font-size:12px;white-space:pre-wrap}
+.block{border:1px dashed var(--line);border-radius:8px;padding:8px;margin:8px 0}
+.tabs{display:flex;gap:8px;margin:12px 0}.tabs button.on{outline:2px solid #fff}
+.post{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:8px 0}
+a{color:#7db8ff}
+#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10}
+#gate .card{width:min(420px,90vw)}
+</style>
+</head>
+<body>
+<div id="gate"><div class="card"><h1>Rich-редактор</h1>
+<p class="mut">Введи ADMIN_KEY (зберігається тільки в цьому браузері).</p>
+<input type="text" id="key" placeholder="ADMIN_KEY" autocomplete="off">
+<div class="row" style="margin-top:8px"><button onclick="login()">Увійти</button></div>
+<p class="mut" id="gate_err"></p></div></div>
+
+<div class="wrap" id="app" style="display:none">
+<h1>Rich-редактор · <span id="ch"></span></h1>
+<div class="tabs">
+<button id="tab_c" class="on" onclick="tab('c')">Допис</button>
+<button id="tab_p" onclick="tab('p')">Надіслані</button>
+</div>
+
+<div id="pane_c">
+<div class="card"><h2>Блоки</h2><div id="blocks"></div>
+<div class="row">
+<button onclick="add('p')">+ Абзац</button>
+<button onclick="add('h')">+ Заголовок</button>
+<button onclick="add('slideshow')">+ Слайдшоу</button>
+<button class="ghost" onclick="add('divider')">+ Розділювач</button>
+</div>
+<p class="mut">Розмітка в тексті: **жирний**, *курсив*, `код`, [текст](https://url). Довгий текст — абзацами, а не підписом.</p>
+</div>
+
+<div class="card"><h2>Превʼю HTML</h2>
+<div class="row"><button class="ghost" onclick="preview()">Оновити превʼю</button></div>
+<pre id="pv">—</pre></div>
+
+<div class="card"><h2>Публікація</h2>
+<div class="row"><input type="text" id="chat" style="max-width:220px">
+<input type="text" id="mid" placeholder="message_id для edit чужого" style="max-width:220px"></div>
+<div class="row" style="margin-top:8px">
+<button onclick="send()">Надіслати новий</button>
+<button class="ghost" onclick="saveEdit()">Зберегти правку</button>
+<span class="mut" id="editinfo"></span></div>
+<p id="res"></p></div>
+</div>
+
+<div id="pane_p" style="display:none"><div class="card"><h2>Надіслані дописи</h2>
+<div class="row"><button class="ghost" onclick="loadPosts()">Оновити</button></div>
+<div id="posts"></div></div></div>
+</div>
+
+<script>
+let K=localStorage.getItem('re_key')||'';
+let BL=[];let editing=null;
+async function api(p,m,b,form){
+  const h={'X-Auth-Key':K};let o={method:m||'GET',headers:h};
+  if(form){o.body=form}else if(b!==undefined){h['Content-Type']='application/json';o.body=JSON.stringify(b)}
+  const r=await fetch(p,o);return r.json();
+}
+async function login(){
+  K=document.getElementById('key').value.trim();localStorage.setItem('re_key',K);
+  const r=await api('/api/config');if(r.ok){enter()}else{document.getElementById('gate_err').textContent='Невірний ключ'}
+}
+async function enter(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  const r=await api('/api/config');
+  document.getElementById('ch').textContent=r.channel;
+  document.getElementById('chat').value=r.channel;
+  if(!BL.length)add('slideshow');
+}
+function tab(t){
+  document.getElementById('tab_c').className=t=='c'?'on':'';
+  document.getElementById('tab_p').className=t=='p'?'on':'';
+  document.getElementById('pane_c').style.display=t=='c'?'block':'none';
+  document.getElementById('pane_p').style.display=t=='p'?'block':'none';
+  if(t=='p')loadPosts();
+}
+function add(t){
+  const b={t};if(t=='p')b.text='';if(t=='h'){b.level=2;b.text=''}
+  if(t=='slideshow'){b.photos=[];b.caption=''}
+  BL.push(b);render();
+}
+function del(i){BL.splice(i,1);render()}
+function mv(i,d){const j=i+d;if(j<0||j>=BL.length)return;const t=BL[i];BL[i]=BL[j];BL[j]=t;render()}
+function phmv(bi,i,d){const p=BL[bi].photos;const j=i+d;if(j<0||j>=p.length)return;const t=p[i];p[i]=p[j];p[j]=t;render()}
+function phdel(bi,i){BL[bi].photos.splice(i,1);render()}
+async function up(bi,files){
+  for(const f of files){
+    const fd=new FormData();fd.append('photo',f);
+    const r=await api('/api/upload','POST',null,fd);
+    if(r.ok)BL[bi].photos.push({up:r.upload_id,url:r.preview_url});else alert(r.description);
+  }
+  render();
+}
+function render(){
+  const w=document.getElementById('blocks');w.innerHTML='';
+  BL.forEach((b,i)=>{
+    const d=document.createElement('div');d.className='block';
+    let h='<div class="row"><b>'+({p:'Абзац',h:'Заголовок',slideshow:'Слайдшоу',divider:'Розділювач'}[b.t])+'</b>'
+      +'<span style="flex:1"></span><button class="ghost" onclick="mv('+i+',-1)">↑</button>'
+      +'<button class="ghost" onclick="mv('+i+',1)">↓</button>'
+      +'<button class="danger" onclick="del('+i+')">✕</button></div>';
+    if(b.t=='p')h+='<textarea oninput="BL['+i+'].text=this.value">'+(b.text||'')+'</textarea>';
+    if(b.t=='h')h+='<div class="row"><input type="text" value="'+(b.level||2)+'" style="max-width:60px" oninput="BL['+i+'].level=this.value">'
+      +'<textarea oninput="BL['+i+'].text=this.value" style="flex:1">'+(b.text||'')+'</textarea></div>';
+    if(b.t=='slideshow'){
+      h+='<input type="file" accept="image/*" multiple onchange="up('+i+',this.files)"><div class="thumbs">';
+      (b.photos||[]).forEach((p,j)=>{
+        h+='<div class="thumb"><img src="'+p.url+'"><div class="ctl"><button class="ghost" onclick="phmv('+i+','+j+',-1)">←</button>'
+          +'<button class="ghost" onclick="phmv('+i+','+j+',1)">→</button>'
+          +'<button class="danger" onclick="phdel('+i+','+j+')">✕</button></div></div>';
+      });
+      h+='</div><input type="text" placeholder="Короткий підпис (можна порожньо)" value="'+(b.caption||'').replace(/"/g,'&quot;')+'" oninput="BL['+i+'].caption=this.value" style="margin-top:8px">';
+    }
+    d.innerHTML=h;w.appendChild(d);
+  });
+  document.getElementById('editinfo').textContent=editing?('Правка поста #'+editing):'';
+}
+async function preview(){
+  const r=await api('/api/preview','POST',{blocks:BL});
+  document.getElementById('pv').textContent=r.ok?r.html:('Помилка: '+r.description);
+}
+async function send(){
+  const r=await api('/api/send','POST',{chat:document.getElementById('chat').value,blocks:BL});
+  document.getElementById('res').innerHTML=r.ok?('Опубліковано: <a target="_blank" href="'+r.link+'">'+r.link+'</a>'):('Помилка: '+r.description);
+}
+async function saveEdit(){
+  const mid=document.getElementById('mid').value.trim();
+  const b={blocks:BL};if(editing)b.post_id=editing;else if(mid)b.message_id=+mid;
+  else{alert('Нема чого правити: відкрий пост зі списку або введи message_id');return}
+  b.chat=document.getElementById('chat').value;
+  const r=await api('/api/edit','POST',b);
+  document.getElementById('res').innerHTML=r.ok?('Збережено: <a target="_blank" href="'+r.link+'">'+r.link+'</a>'):('Помилка: '+r.description);
+}
+async function loadPosts(){
+  const r=await api('/api/posts');const w=document.getElementById('posts');w.innerHTML='';
+  if(!r.ok){w.textContent='Помилка: '+r.description;return}
+  if(!r.posts.length){w.innerHTML='<p class="mut">Поки порожньо.</p>';return}
+  r.posts.forEach(p=>{
+    const d=document.createElement('div');d.className='post';
+    d.innerHTML='<div><a target="_blank" href="'+p.link+'">#'+p.message_id+'</a> · '+p.chat+' · '+p.created_at.slice(0,16).replace('T',' ')+'<br><span class="mut"></span></div>';
+    d.querySelector('.mut').textContent=p.excerpt;
+    const e=document.createElement('button');e.className='ghost';e.textContent='Правити';
+    e.onclick=async()=>{const q=await api('/api/posts/'+p.id);if(q.ok){BL=q.post.blocks;editing=p.id;render();tab('c');preview()}};
+    const x=document.createElement('button');x.className='danger';x.textContent='Видалити';
+    x.onclick=async()=>{if(confirm('Видалити пост #'+p.message_id+'?')){await api('/api/delete','POST',{post_id:p.id});loadPosts()}};
+    const g=document.createElement('div');g.appendChild(e);g.appendChild(x);d.appendChild(g);w.appendChild(d);
+  });
+}
+if(K)login();
+</script>
+</body>
+</html>
