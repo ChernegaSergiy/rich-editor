@@ -166,11 +166,16 @@ body {
   border-color: var(--pico-del-color);
 }
 
-button.s {
-  width: auto;
-  padding: 0.15rem 0.6rem;
-  font-size: 0.85rem;
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.actions button {
   margin: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  flex: 1;
+  border-radius: 4px;
 }
 
 .bubble {
@@ -241,11 +246,6 @@ pre.src {
 @keyframes slideIn {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
-}
-
-.del-btn {
-  color: var(--pico-del-color);
-  border-color: var(--pico-del-color);
 }
 
 @media (max-width: 768px) {
