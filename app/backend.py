@@ -485,9 +485,9 @@ def main():
         raise SystemExit("BOT_TOKEN and ADMIN_KEY env vars are required")
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     db().close()
-    with socketserver.ThreadingTCPServer(("127.0.0.1", PORT), Handler) as httpd:
+    with socketserver.ThreadingTCPServer(("0.0.0.0", PORT), Handler) as httpd:
         httpd.allow_reuse_address = True
-        print("rich-editor on 127.0.0.1:%d channel=%s" % (PORT, CHANNEL), flush=True)
+        print("rich-editor on 0.0.0.0:%d channel=%s" % (PORT, CHANNEL), flush=True)
         httpd.serve_forever()
 
 
