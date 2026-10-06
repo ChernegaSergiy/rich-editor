@@ -24,6 +24,7 @@ DATA_DIR = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "..", "data"))
 UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
 DB_PATH = os.path.join(DATA_DIR, "rich.db")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+DIST_DIR = os.path.join(STATIC_DIR, "dist")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 ADMIN_KEY = os.environ.get("ADMIN_KEY", "")
@@ -266,7 +267,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
         query = urllib.parse.parse_qs(url.query)
         path = url.path
         if path == "/":
+            dist_index = os.path.join(DIST_DIR, "index.html")
+            if os.path.isfile(dist_index):
+                with open(dist_index, "rb") as fh:
+                    return self._send(200, fh.read(), "text/html; charset=utf-8")
             return self._serve_static("index.html", "text/html; charset=utf-8")
+        if path.startswith("/assets/"):
+            fpath = os.path.join(DIST_DIR, path[len("/") :])
+            if not os.path.isfile(fpath):
+                return self._err(404, "Not found")
+            mime = mimetypes.guess_type(fpath)[0] or "application/octet-stream"
+            with open(fpath, "rb") as fh:
+                return self._send(200, fh.read(), mime)
         if path.startswith("/static/"):
             name = os.path.basename(path)
             if name not in ("index.html",):
